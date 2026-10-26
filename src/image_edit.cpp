@@ -244,10 +244,10 @@ void ViewerApp::SaveImage() {
     static std::map<std::wstring, uint64_t> s_pendingSaves;
     static std::mutex s_savesMutex;
 
-    // AVIF/HEIC/WebP save prompt
+    // AVIF/HEIC/WebP/JXL save prompt
     const wchar_t* ext = PathFindExtensionW(originalPath.c_str());
-    if (ext && (_wcsicmp(ext, L".heic") == 0 || _wcsicmp(ext, L".heif") == 0 || _wcsicmp(ext, L".avif") == 0 || _wcsicmp(ext, L".webp") == 0)) {
-        if (MessageBoxW(m_ctx.hWnd, L"HEIC, AVIF, and WebP files cannot be natively overwritten. Would you like to save your edits as a PNG instead?", L"Save Edits", MB_YESNO | MB_ICONQUESTION) == IDYES) {
+    if (ext && (_wcsicmp(ext, L".heic") == 0 || _wcsicmp(ext, L".heif") == 0 || _wcsicmp(ext, L".avif") == 0 || _wcsicmp(ext, L".webp") == 0 || _wcsicmp(ext, L".jxl") == 0)) {
+        if (MessageBoxW(m_ctx.hWnd, L"HEIC, AVIF, WebP, and JXL files cannot be natively overwritten. Would you like to save your edits as a PNG instead?", L"Save Edits", MB_YESNO | MB_ICONQUESTION) == IDYES) {
 
             wchar_t newPath[MAX_PATH];
             wcscpy_s(newPath, MAX_PATH, originalPath.c_str());

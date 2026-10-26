@@ -85,7 +85,7 @@ For the ultra-minimal legacy build, try the [stripped 21 KB executable](https://
 Supports a wide range of formats using WIC + custom decoders:
 
 - **Standard**: JPEG, PNG, BMP, GIF, TIFF, ICO, WebP  
-- **Modern**: HEIF, HEIC, AVIF  
+- **Modern**: HEIF, HEIC, AVIF, JPEG XL (JXL) *(requires the free "JPEG XL Image Extension" from the Microsoft Store)*  
 - **RAW (Camera)**: CR2, CR3, NEF, DNG, ARW, ORF, RW2 *(via codecs)*  
 - **Advanced Formats**:
   - **SVG (Vector rendering, GPU-accelerated)**

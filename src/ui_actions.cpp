@@ -24,7 +24,7 @@ void ViewerApp::OpenFileAction() {
     wchar_t szFile[MAX_PATH] = { 0 };
     OPENFILENAMEW ofn = { sizeof(OPENFILENAMEW) };
     ofn.hwndOwner = m_ctx.hWnd;
-    ofn.lpstrFilter = L"All Image Files\0*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.tif;*.ico;*.webp;*.heic;*.heif;*.avif;*.cr2;*.cr3;*.nef;*.dng;*.arw;*.orf;*.rw2;*.svg;*.qoi;*.hdr\0HDR Files (*.hdr)\0*.hdr\0SVG Files (*.svg)\0*.svg\0QOI Files (*.qoi)\0*.qoi\0PNG Files (*.png)\0*.png\0JPEG Files (*.jpg;*.jpeg)\0*.jpg;*.jpeg\0WebP Files (*.webp)\0*.webp\0All Files (*.*)\0*.*\0";
+    ofn.lpstrFilter = L"All Image Files\0*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.tif;*.ico;*.webp;*.heic;*.heif;*.avif;*.jxl;*.cr2;*.cr3;*.nef;*.dng;*.arw;*.orf;*.rw2;*.svg;*.qoi;*.hdr\0HDR Files (*.hdr)\0*.hdr\0SVG Files (*.svg)\0*.svg\0QOI Files (*.qoi)\0*.qoi\0JPEG XL Files (*.jxl)\0*.jxl\0PNG Files (*.png)\0*.png\0JPEG Files (*.jpg;*.jpeg)\0*.jpg;*.jpeg\0WebP Files (*.webp)\0*.webp\0All Files (*.*)\0*.*\0";
     ofn.lpstrFile = szFile;
     ofn.nMaxFile = MAX_PATH;
     if (!initialDir.empty()) {
@@ -274,7 +274,7 @@ void ViewerApp::RegisterFileAssociations() {
     }
 
     // Register FileAssociations 
-    const wchar_t* exts[] = { L".jpg", L".jpeg", L".png", L".bmp", L".gif", L".webp", L".heic", L".heif", L".avif", L".svg", L".qoi", L".hdr", L".tiff", L".tif", L".ico" };
+    const wchar_t* exts[] = { L".jpg", L".jpeg", L".png", L".bmp", L".gif", L".webp", L".heic", L".heif", L".avif", L".jxl", L".svg", L".qoi", L".hdr", L".tiff", L".tif", L".ico" };
     if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\MinimalImageViewer\\Capabilities\\FileAssociations", 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &hKey, nullptr) == ERROR_SUCCESS) {
         for (const auto& ext : exts) {
             RegSetValueExW(hKey, ext, 0, REG_SZ, reinterpret_cast<const BYTE*>(progId.c_str()), static_cast<DWORD>((progId.length() + 1) * sizeof(wchar_t)));
