@@ -85,7 +85,7 @@ For the ultra-minimal legacy build, try the [stripped 21 KB executable](https://
 Supports a wide range of formats using WIC + custom decoders:
 
 - **Standard**: JPEG, PNG, BMP, GIF, TIFF, ICO, WebP  
-- **Modern**: HEIF, HEIC, AVIF  
+- **Modern**: HEIF, HEIC, AVIF, JPEG XL (`.jxl`)  
 - **RAW (Camera)**: CR2, CR3, NEF, DNG, ARW, ORF, RW2 *(via codecs)*  
 - **Advanced Formats**:
   - **SVG (Vector rendering, GPU-accelerated)**
@@ -312,6 +312,11 @@ Supports a wide range of formats using WIC + custom decoders:
 
 - **QOI**
   - Decoded via embedded `qoi.h`
+
+- **JPEG XL**
+  - Decoded via a bundled libjxl 0.12 static library (no extra runtime)
+  - Codestream and container `.jxl` files, including JPEG recompression
+  - Output is 8-bit sRGB with straight alpha. Animations show the first frame.
 
 ---
 

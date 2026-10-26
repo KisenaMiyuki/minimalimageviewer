@@ -23,6 +23,7 @@
     <ClCompile Include="image_drawing.cpp" />
     <ClCompile Include="image_edit.cpp" />
     <ClCompile Include="image_io.cpp" />
+    <ClCompile Include="jxl_decode.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="settings_handler.cpp" />
     <ClCompile Include="ui_actions.cpp" />
@@ -33,6 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="exif_utils.h" />
+    <ClInclude Include="jxl_decode.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="translations.h" />
     <ClInclude Include="viewer.h" />
@@ -45,6 +47,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\third_party\libjxl\jxl_dec.vcxproj">
+      <Project>{7C4E9A21-6B18-4F0D-9C33-5E8A1D2B4F70}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -106,9 +113,10 @@
       <ConformanceMode>true</ConformanceMode>
 		<LanguageStandard>stdcpp20</LanguageStandard>
 		<LanguageStandard_C>stdc17</LanguageStandard_C>
-		<AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
 		<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
 		<Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\third_party\libjxl\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -128,6 +136,7 @@
 		<LanguageStandard_C>stdc17</LanguageStandard_C>
 		<AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\third_party\libjxl\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -146,6 +155,7 @@
 		<AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
 		<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
 		<Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\third_party\libjxl\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -165,6 +175,7 @@
 		<LanguageStandard_C>stdc17</LanguageStandard_C>
 		<AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\third_party\libjxl\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -11,6 +11,7 @@
 
 #define QOI_IMPLEMENTATION
 #include "qoi.h"
+#include "jxl_decode.h"
 
 // stb_image is used only for Radiance HDR (.hdr) float decoding
 
@@ -27,7 +28,7 @@ static bool IsImageFile(const wchar_t* filePath) {
     return PathMatchSpecW(filePath,
         L"*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.tif;*.ico;*.webp;*.heic;*.heif;*.avif;"
         L"*.cr2;*.cr3;*.nef;*.dng;*.arw;*.orf;*.rw2;"
-        L"*.svg;*.qoi;*.hdr;"
+        L"*.svg;*.qoi;*.hdr;*.jxl;"
         L"*.tga;*.psd;*.ppm;*.pgm;*.pbm;*.pnm;*.pic") == TRUE;
 }
 
@@ -251,6 +252,81 @@ void ViewerApp::LoadImageFromFile(const std::wstring& filePath, bool startAtEnd)
                     }
                 }
                 free(pixels);
+            }
+            PostMessage(m_ctx.hWnd, WM_APP_IMAGE_LOAD_FAILED, 0, (LPARAM)mySeqId);
+            return;
+        }
+
+        if (ext && _wcsicmp(ext, L".jxl") == 0) {
+            JxlDecodedImage decoded;
+            const JxlDecodeStatus jxlStatus = DecodeJxlToRgba(rawData.data(), rawData.size(), decoded, nullptr);
+            if (jxlStatus == JxlDecodeStatus::TooLarge) {
+                MessageBoxW(
+                    m_ctx.hWnd,
+                    L"This JPEG XL image is too large to decode safely.",
+                    L"JPEG XL Image Too Large",
+                    MB_ICONWARNING);
+                PostMessage(m_ctx.hWnd, WM_APP_IMAGE_LOAD_FAILED, 0, (LPARAM)mySeqId);
+                return;
+            }
+            if (jxlStatus == JxlDecodeStatus::Ok) {
+                ComPtr<IWICBitmap> jxlBmp;
+                if (SUCCEEDED(localFactory->CreateBitmap(decoded.width, decoded.height, GUID_WICPixelFormat32bppRGBA, WICBitmapCacheOnLoad, &jxlBmp))) {
+                    WICRect rc = { 0, 0, static_cast<INT>(decoded.width), static_cast<INT>(decoded.height) };
+                    ComPtr<IWICBitmapLock> bmpLock;
+                    if (SUCCEEDED(jxlBmp->Lock(&rc, WICBitmapLockWrite, &bmpLock))) {
+                        UINT cbStride = 0;
+                        UINT cbBufferSize = 0;
+                        BYTE* pbBuffer = nullptr;
+                        bmpLock->GetStride(&cbStride);
+                        bmpLock->GetDataPointer(&cbBufferSize, &pbBuffer);
+                        const UINT rowBytes = decoded.width * 4u;
+                        if (pbBuffer && cbStride >= rowBytes) {
+                            for (UINT y = 0; y < decoded.height; ++y) {
+                                memcpy(
+                                    pbBuffer + static_cast<size_t>(y) * cbStride,
+                                    decoded.rgba.data() + static_cast<size_t>(y) * rowBytes,
+                                    rowBytes);
+                            }
+                        }
+                    }
+
+                    ComPtr<IWICBitmapSource> sourceToCache = jxlBmp;
+                    bool downscaled = false;
+                    float ratio = 1.0f;
+                    UINT maxDim = 3840;
+
+                    if (decoded.width > maxDim || decoded.height > maxDim) {
+                        downscaled = true;
+                        ratio = std::min(static_cast<float>(maxDim) / decoded.width, static_cast<float>(maxDim) / decoded.height);
+                        UINT newW = static_cast<UINT>(decoded.width * ratio);
+                        UINT newH = static_cast<UINT>(decoded.height * ratio);
+
+                        ComPtr<IWICBitmapScaler> scaler;
+                        if (SUCCEEDED(localFactory->CreateBitmapScaler(&scaler))) {
+                            if (SUCCEEDED(scaler->Initialize(sourceToCache.Get(), newW, newH, WICBitmapInterpolationModeFant))) {
+                                sourceToCache = scaler;
+                            }
+                        }
+                    }
+
+                    if (ComPtr<IWICFormatConverter> finalConverter = ConvertToFormat(localFactory.Get(), sourceToCache.Get())) {
+                        std::lock_guard<std::recursive_mutex> lock(m_ctx.wicMutex);
+                        m_ctx.stagedStaticConverter = finalConverter;
+                        // Full pixels are already in the bitmap. WIC cannot reopen .jxl for deep zoom.
+                        m_ctx.stagedRawFileData.clear();
+                        m_ctx.stagedWicStream = nullptr;
+                        m_ctx.stagedWidth = decoded.width;
+                        m_ctx.stagedHeight = decoded.height;
+                        m_ctx.originalContainerFormat = GUID_NULL;
+                        m_ctx.stagedOrientation = 1;
+                        m_ctx.isDownscaled = downscaled;
+                        m_ctx.downscaleRatio = ratio;
+
+                        PostMessage(m_ctx.hWnd, WM_APP_IMAGE_READY, 1, (LPARAM)mySeqId);
+                        return;
+                    }
+                }
             }
             PostMessage(m_ctx.hWnd, WM_APP_IMAGE_LOAD_FAILED, 0, (LPARAM)mySeqId);
             return;

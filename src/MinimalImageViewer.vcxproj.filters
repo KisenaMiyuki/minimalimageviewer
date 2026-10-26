@@ -21,6 +21,9 @@
     <ClInclude Include="exif_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="jxl_decode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="viewer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -39,6 +42,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="image_io.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jxl_decode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
