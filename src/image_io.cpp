@@ -25,7 +25,7 @@
 
 static bool IsImageFile(const wchar_t* filePath) {
     return PathMatchSpecW(filePath,
-        L"*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.tif;*.ico;*.webp;*.heic;*.heif;*.avif;"
+        L"*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.tif;*.ico;*.webp;*.heic;*.heif;*.avif;*.jxl;"
         L"*.cr2;*.cr3;*.nef;*.dng;*.arw;*.orf;*.rw2;"
         L"*.svg;*.qoi;*.hdr;"
         L"*.tga;*.psd;*.ppm;*.pgm;*.pbm;*.pnm;*.pic") == TRUE;
@@ -515,12 +515,21 @@ void ViewerApp::LoadImageFromFile(const std::wstring& filePath, bool startAtEnd)
         }
 
         if (FAILED(hr)) {
-            // Intercept HEIC/AVIF failures and prompt to install native codec
+            // Intercept HEIC/AVIF/JXL failures and prompt to install native codec
+            const wchar_t* missingCodecPrompt = nullptr;
+            const wchar_t* storeUri = nullptr;
             if (ext && (_wcsicmp(ext, L".heic") == 0 || _wcsicmp(ext, L".heif") == 0 || _wcsicmp(ext, L".avif") == 0)) {
-                if (MessageBoxW(m_ctx.hWnd,
-                    L"To view HEIC and AVIF images natively, you need the free 'HEIF Image Extensions' from the Microsoft Store.\n\nWould you like to open the Store page?",
-                    L"Missing Image Codec", MB_YESNO | MB_ICONINFORMATION) == IDYES) {
-                    ShellExecuteW(nullptr, L"open", L"ms-windows-store://pdp/?ProductId=9PMMSR1CGPWG", nullptr, nullptr, SW_SHOW);
+                missingCodecPrompt = L"To view HEIC and AVIF images natively, you need the free 'HEIF Image Extensions' from the Microsoft Store.\n\nWould you like to open the Store page?";
+                storeUri = L"ms-windows-store://pdp/?ProductId=9PMMSR1CGPWG";
+            }
+            else if (ext && _wcsicmp(ext, L".jxl") == 0) {
+                missingCodecPrompt = L"To view JPEG XL images natively, you need the free 'JPEG XL Image Extension' from the Microsoft Store (requires Windows 11 version 24H2 or later).\n\nWould you like to open the Store page?";
+                storeUri = L"ms-windows-store://pdp/?ProductId=9MZPRTH5C0TB";
+            }
+
+            if (missingCodecPrompt) {
+                if (MessageBoxW(m_ctx.hWnd, missingCodecPrompt, L"Missing Image Codec", MB_YESNO | MB_ICONINFORMATION) == IDYES) {
+                    ShellExecuteW(nullptr, L"open", storeUri, nullptr, nullptr, SW_SHOW);
                 }
                 PostMessage(m_ctx.hWnd, WM_APP_IMAGE_LOAD_FAILED, 0, (LPARAM)mySeqId);
                 return;
